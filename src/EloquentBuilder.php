@@ -47,9 +47,10 @@ class EloquentBuilder extends AbstractBuilder implements BuilderInterface
      */
     public function make($withKeys = false)
     {
-        $count = $this->queryBuilder->count();
+        // Model must have datatable scope
+        // TODO Check datatable scope defind in the model
+        $count = $this->queryBuilder->datatable()->count();
         $data  = $this->getQueryResult($this->queryBuilder, $this->getParameters);
-        $data  = $this->removeKeys($data, ! $withKeys);
 
         return $this->getResponse($data, $count, $this->getParameters);
     }
@@ -66,10 +67,13 @@ class EloquentBuilder extends AbstractBuilder implements BuilderInterface
         $schema  = $builder->getModel()->getConnection()->getSchemaBuilder();
         $table   = $builder->getModel()->getTable();
         $columns = $schema->getColumnListing($table);
-
-        foreach ($columns as $index => $column) {
-            $builder->orWhere($column, 'LIKE', '%' . $get['search']['value'] . '%');
-        }
+        
+        $builder->dataTable(); // use datatable scope
+        $builder->where(function ($query) use($columns, $get) {
+            foreach ($columns as $index => $column) {
+                $query->orWhere($column, 'LIKE', '%' . $get['search']['value'] . '%');
+            }
+        });
 
         $builder->limit($get['length']);
         $builder->offset($get['start']);
