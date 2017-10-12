@@ -75,8 +75,15 @@ class EloquentBuilder extends AbstractBuilder implements BuilderInterface
             }
         });
 
+        $columns = $get['columns'];
+        $order_column_id = $get['order'][0]['column'];
+        $order = $columns[$order_column_id]['name'];
+        $dir = $get['order'][0]['dir'];
+        $dir = in_array($dir, ['asc', 'desc']) ? $dir : 'asc';
+        
         $builder->limit($get['length']);
         $builder->offset($get['start']);
+        $order ? $builder->orderBy($order, $dir) : '';
 
         return $builder->get()->toArray();
     }
