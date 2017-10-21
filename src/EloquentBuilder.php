@@ -36,6 +36,9 @@ class EloquentBuilder extends AbstractBuilder implements BuilderInterface
             $model = new $builder;
 
             $this->queryBuilder = $model->query();
+            if (method_exists($builder, 'scopeDataTable')) {
+                $this->queryBuilder->datatable();
+            }
         }
     }
 
@@ -48,8 +51,7 @@ class EloquentBuilder extends AbstractBuilder implements BuilderInterface
     public function make($withKeys = false)
     {
         // Model must have datatable scope
-        // TODO Check datatable scope defind in the model
-        $count = $this->queryBuilder->datatable()->count();
+        $count = $this->queryBuilder->count();
         $data  = $this->getQueryResult($this->queryBuilder, $this->getParameters);
 
         return $this->getResponse($data, $count, $this->getParameters);
@@ -67,7 +69,7 @@ class EloquentBuilder extends AbstractBuilder implements BuilderInterface
         $schema  = $builder->getModel()->getConnection()->getSchemaBuilder();
         $table   = $builder->getModel()->getTable();
         $columns = $schema->getColumnListing($table);
-        
+
         $builder->dataTable(); // use datatable scope
         $builder->where(function ($query) use($columns, $get) {
             foreach ($columns as $index => $column) {
@@ -80,7 +82,7 @@ class EloquentBuilder extends AbstractBuilder implements BuilderInterface
         $order = $columns[$order_column_id]['name'];
         $dir = $get['order'][0]['dir'];
         $dir = in_array($dir, ['asc', 'desc']) ? $dir : 'asc';
-        
+
         $builder->limit($get['length']);
         $builder->offset($get['start']);
         $order ? $builder->orderBy($order, $dir) : '';
