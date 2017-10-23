@@ -70,7 +70,6 @@ class EloquentBuilder extends AbstractBuilder implements BuilderInterface
         $table   = $builder->getModel()->getTable();
         $columns = $schema->getColumnListing($table);
 
-        $builder->dataTable(); // use datatable scope
         $builder->where(function ($query) use($columns, $get) {
             foreach ($columns as $index => $column) {
                 $query->orWhere($column, 'LIKE', '%' . $get['search']['value'] . '%');
