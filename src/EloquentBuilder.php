@@ -72,7 +72,9 @@ class EloquentBuilder extends AbstractBuilder implements BuilderInterface
 
         $builder->where(function ($query) use($columns, $get) {
             foreach ($columns as $index => $column) {
-                $query->orWhere($column, 'LIKE', '%' . $get['search']['value'] . '%');
+                if (!in_array($column, ['created_at', 'updated_at'])) {
+                    $query->orWhere($column, 'LIKE', '%' . $get['search']['value'] . '%');
+                }
             }
         });
 
